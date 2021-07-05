@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 from pprint import pprint
 
+# naver 영화 url 가져오기
 def get_movie_link(url):
   res = requests.get(url)
   soup = BeautifulSoup(res.text, 'html5lib')
@@ -23,6 +24,8 @@ def get_movie_link(url):
 
 # pprint(movie_links)
 
+
+# 영화 url를 접속한 후 장르 가져오기
 def genre_list(url):
   movie_links_list = get_movie_link(url)
 
@@ -41,6 +44,34 @@ def genre_list(url):
 
   return genre_list
 
-url = "http://movie.naver.com/movie/point/af/list.nhn"
-genre_list_data = genre_list(url)
-pprint(genre_list_data)
+# url = "http://movie.naver.com/movie/point/af/list.nhn"
+# genre_list_data = genre_list(url)
+
+# pprint(genre_list_data)
+
+# naver 영화 평가 한 유저정보 리스트 가져오기 함수
+def get_user_list(url):
+  res = requests.get(url)
+  content = res.text
+
+  soup = BeautifulSoup(content, 'html5lib')
+
+  page_links = soup.select('a[href]')
+
+  page_link_list = []
+
+  for link in page_links:
+    if re.search(r'&target=after', link['href']):
+      target_url = 'http://movie.naver.com' + str(link['href'])
+      page_link_list.append(target_url)
+
+  if len(page_link_list) != 1:
+    pop_number = len(page_link_list)-1
+    page_link_list.pop(pop_number)
+
+  return page_link_list
+
+url = "http://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=187322&target=after"
+point_data = get_user_list(url)
+
+pprint(point_data)
