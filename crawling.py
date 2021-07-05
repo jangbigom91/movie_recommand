@@ -71,7 +71,39 @@ def get_user_list(url):
 
   return page_link_list
 
-url = "http://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=187322&target=after"
-point_data = get_user_list(url)
+# url = "http://movie.naver.com/movie/point/af/list.nhn?st=mcode&sword=187322&target=after"
+# point_data = get_user_list(url)
 
-pprint(point_data)
+# pprint(point_data)
+
+# url 받아서 데이터를 크롤링
+def do_crawl(url):
+  url_list = get_user_list(url)
+
+  if len(url_list) >= 2:
+    for url in url_list:
+      genre_list = genre_list(url)
+
+      res = requests.get(url)
+      content = res.text
+
+      soup = BeautifulSoup(content, 'html5lib')
+
+      user_id = soup.find_all('a', class_='author')
+      title   = soup.find_all('td', class_='title')
+      score   = soup.find_all('td', class_='point')
+
+      user_id_list = []
+      for user_id in user_id:
+        replaced_user_id = re.sub(r'[*]', user_id.get_text())
+        user_id_list.append(replaced_user_id)
+
+      title_list = []
+      for title in title:
+        title_list.append(title.a.get_text())
+
+      score_list = []
+      for score in score:
+        score_list.append(score.a.get_text())
+
+      pprint(user_id_list, title_list, score_list)
